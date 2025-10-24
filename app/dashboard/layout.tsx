@@ -1,5 +1,4 @@
-﻿"use client"
-
+"use client"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { getCurrentUser, signOut } from "@/lib/supabase/auth"
@@ -15,7 +14,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       const { user, profile } = await getCurrentUser()
       
       if (!user) {
-        router.push("/login")
+        router.push("/")
         return
       }
 
@@ -28,7 +27,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const handleSignOut = async () => {
     await signOut()
-    router.push("/login")
+    router.push("/")
   }
 
   if (loading) {
