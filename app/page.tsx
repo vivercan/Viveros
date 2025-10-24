@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
-import { Eye, EyeOff, Lock, Mail, Loader2 } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -11,8 +10,6 @@ export default function LoginPage() {
   
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [rememberMe, setRememberMe] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -20,11 +17,10 @@ export default function LoginPage() {
     const savedEmail = localStorage.getItem('fx27_remembered_email')
     if (savedEmail) {
       setEmail(savedEmail)
-      setRememberMe(true)
     }
   }, [])
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e) => {
     e.preventDefault()
     setLoading(true)
     setError('')
@@ -36,36 +32,17 @@ export default function LoginPage() {
       })
 
       if (error) {
-        if (error.message.includes('Invalid login credentials')) {
-          setError('Usuario o contrasena incorrectos')
-        } else {
-          setError(error.message)
-        }
+        setError('Usuario o contrasena incorrectos')
         return
       }
 
-      if (rememberMe) {
-        localStorage.setItem('fx27_remembered_email', email.trim())
-      } else {
-        localStorage.removeItem('fx27_remembered_email')
-      }
+      localStorage.setItem('fx27_remembered_email', email.trim())
 
       if (data?.user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', data.user.id)
-          .single()
-
-        if (profile?.must_change_password) {
-          router.push('/change-password')
-        } else {
-          router.push('/dashboard')
-        }
+        router.push('/dashboard')
       }
-    } catch (err: any) {
-      setError('Error al iniciar sesion. Intenta de nuevo.')
-      console.error(err)
+    } catch (err) {
+      setError('Error al iniciar sesion')
     } finally {
       setLoading(false)
     }
@@ -79,12 +56,8 @@ export default function LoginPage() {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-4">
               <span className="text-2xl font-bold text-white">FX27</span>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Bienvenido
-            </h1>
-            <p className="text-gray-600">
-              Inicia sesion en tu cuenta
-            </p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">FX27 CRM</h1>
+            <p className="text-gray-600">Inicia sesion para continuar</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">
@@ -96,93 +69,40 @@ export default function LoginPage() {
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Correo Electronico
+                Email
               </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  placeholder="tu@empresa.com"
-                  autoComplete="email"
-                />
-              </div>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="tu@email.com"
+              />
             </div>
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Contrasena
               </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="w-full pl-11 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  placeholder="••••••••"
-                  autoComplete="current-password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                  title={showPassword ? 'Ocultar contrasena' : 'Mostrar contrasena'}
-                >
-                  {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            <div className="flex items-center">
               <input
-                type="checkbox"
-                id="rememberMe"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Tu contrasena"
               />
-              <label htmlFor="rememberMe" className="ml-2 text-sm text-gray-700 cursor-pointer select-none">
-                Recordar usuario
-              </label>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all font-semibold disabled:opacity-50"
             >
-              {loading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Iniciando sesion...
-                </>
-              ) : (
-                'Iniciar Sesion'
-              )}
+              {loading ? 'Iniciando sesion...' : 'Iniciar Sesion'}
             </button>
-
-            <div className="text-center">
-              
-                href="/forgot-password"
-                className="text-sm text-blue-600 hover:text-blue-700 font-semibold transition-colors"
-              >
-                Olvide mi contrasena
-              </a>
-            </div>
           </form>
-
-          <div className="mt-6 text-center text-sm text-gray-600">
-            FX27 CRM - Sistema de Gestion Comercial
-          </div>
         </div>
       </div>
     </div>
